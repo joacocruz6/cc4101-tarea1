@@ -40,9 +40,18 @@
     [(list arg-expr '-> res-expr) (TFun (parse-type arg-expr) (parse-type res-expr))]
     [(list arg-expr '->) (error "Parse error")]
     [(list '-> res-expr) (error "Parse error")]))
+(define (parse s-expr)
+  (match s-expr
+    [(? number?) (num s-expr)]
+    [(? id?) (id s-expr)]
+    [(list '+ l r) (add (parse l) (parse r))]
+    [(list '- l r) (sub (parse l) (parse r))]))
+;TODO funciones y with...
 
-(define (parse s-expr)#f)
-
+(define (prettify t-expr)
+  (match t-expr
+  [(TNum) 'Num]
+  [(TFun t-arg t-ret) (list (prettify t-arg) '-> (prettify t-ret))]))
 (define (deBruijn expr)#f)
 
 (define (compile expr) #f)
