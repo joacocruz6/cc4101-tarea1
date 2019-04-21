@@ -30,13 +30,18 @@
 (deftype Type
   (TNum)
   (TFun arg ret))
-
+#|
+Definición del ambiente de variables con sus tipos
+|#
 (deftype TypeEnv
   (mtEnv)
   (tpEnv id type next))
 (define empty-type-env (mtEnv))
 (define extend-type-env tpEnv)
-
+#|
+lookup-type-env ::= id TypeEnv -> Type (o error)
+Busca el tipo de la variable x en el ambiente, si no esta tira error de identificador libre.
+|#
 (define (lookup-type-env x env)
   (match env
     [(mtEnv) (error "Type error: free identifier:" x)]
@@ -62,7 +67,7 @@ Por ejemplo: parse-type {Num -> Num} debe dar (TNum) (TNum)
 
 #|
 parse: List[Symbol] -> Expr
-Parsea una lista a las expresiones del lenguaje con tipos
+Parsea una lista de simbolos a un AST del lenguaje con tipos.
 |#
 (define (parse s-expr)
   (match s-expr
@@ -84,6 +89,7 @@ Parsea una lista a las expresiones del lenguaje con tipos
   [(TFun t-arg t-ret) (list (prettify t-arg) '-> (prettify t-ret))]))
 #|
 typeof :: Expr Env -> Type (o error)
+Dada una expresion parseada y un ambiente, determina el tipo de esa expresión.
 |#
 (define (typeof expr [env empty-type-env])
   (match expr
@@ -129,12 +135,44 @@ typeof :: Expr Env -> Type (o error)
             )]       
        [ _ (error "Type error in expression app position 1: expected (T -> S) found" (prettify (typeof expr1 env)))] ;cualquier otra cosa esta mala
     )]))
+#|
+TODO
+|#
 (define (typecheck s-expr)
   (prettify (typeof (parse s-expr))))
+
+
 ;;;;;;;;;
 ;;;P3;;;;
 ;;;;;;;;;
-(define (deBruijn expr)#f)
+(deftype Env
+  (BruijnEnv id next))
+(define empty-bruijn-env (mtEnv))
+(define extend-bruijn-env BruijnEnv)
+#|
+lookup-bruijn-env::= <id> Env -> <acc> (error)
+Busca en el ambiente de bruijn index el id x, y da la expression acc con
+su indice asociado.
+|#
+(define (lookup-bruijn-env x env [pos 0])
+  (match env
+    [(mtEnv) (error "Free identifier:" x)]
+    [(BruijnEnv id next)
+     (if (equal? id x)
+         (acc pos)
+         (lookup-bruijn-env x next (+ pos 1)))]))
+#|
+TODO
+|#
+(define (deBruijn expr [env empty-bruijn-env])
+  (match expr
+    [(num n) (num n)]
+    [(id x) (lookup-bruijn-env x env)]
+    [(add l r) (add (deBruijn l env) (deBruijn r env))]
+    [(sub l r) (sub (deBruijn l env) (deBruijn r env))]
+    [(fun args args-type body body-type) (fun-db (deBruijn body (extend-bruijn-env args env)))]
+    [(app (fun args args-type body body-type) expr2) (app (fun-db (deBruijn body (extend-bruijn-env args env))) (deBruijn expr2 env))]
+    [(app (id x) expr2) (app (lookup-bruijn-env x env) (deBruijn expr2 env))]))
 
 (define (compile expr) #f)
 

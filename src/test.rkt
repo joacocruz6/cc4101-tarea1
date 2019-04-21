@@ -56,11 +56,23 @@
 (test (typecheck '3) 'Num)
 (test (typecheck '{fun {f : Num} : Num 10}) '(Num -> Num))
 (test/exn (typecheck  '{+ 2 {fun {x : Num} : Num x}}) "Type error in expression + position 2: expected Num found (Num -> Num)") ;TODO este test no pasa
-
+(test/exn (typecheck '{+ 1 {with {a : Num 1}
+                                 {with {b : Num 1}
+                                       {with {c : Num 1}
+                                             {with {d : Num (fun {x : Num} : {Num -> Num} 1)}
+                                                   (+ a a)}}}}}) "Type error in expression fun position 1: expected (Num -> Num) found Num")
+(test (lookup-bruijn-env 'x (extend-bruijn-env 'y (extend-bruijn-env 'x empty-bruijn-env))) (acc 1))
+(test/exn (lookup-bruijn-env 'x (extend-bruijn-env 'y (extend-bruijn-env 'z empty-bruijn-env))) "Free identifier: x")
+(test/exn (lookup-bruijn-env 'x empty-bruijn-env) "Free identifier: x")
 ;; deBruijn
 (test (deBruijn (num 3)) (num 3))
+(test (deBruijn (parse '{+ 3 3})) (add (num 3) (num 3)))
+(test (deBruijn (parse '{- 3 3})) (sub (num 3) (num 3)))
 (test (deBruijn (parse '{with {x : Num 5}  {with  {y : Num  {+ x 1}} {+ y x}}}))
       (app (fun-db (app (fun-db (add (acc 0) (acc 1))) (add (acc 0) (num 1)))) (num 5)))
+(test (deBruijn (parse '{with {x : {Num -> Num} {fun {y : Num} : Num (+ y y)}}
+                              {with {y : Num 2}
+                                    {x y}}})) (app (fun-db (app (fun-db (app (acc 1) (acc 0))) (num 2))) (fun-db (add (acc 0) (acc 0)))))
 (test/exn (deBruijn (parse 'x)) "Free identifier: x")
 
 #|
