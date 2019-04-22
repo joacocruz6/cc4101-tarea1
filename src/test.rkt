@@ -78,3 +78,6 @@
 (test (compile (sub (num 1) (num 1))) (list (INT-CONST 1) (INT-CONST 1) (SUB)))
 (test (compile (add (num 2) (num 1))) (list (INT-CONST 1) (INT-CONST 2) (ADD)))
 (test (compile (deBruijn (parse '{{fun {x : Num} : Num {+ x 10}} {+ 2 3}}))) (list (INT-CONST 3) (INT-CONST 2) (ADD) (CLOSURE (list (INT-CONST 10) (ACCESS 0) (ADD) (RETURN))) (APPLY))) 
+
+;;typed-compile
+(test (typed-compile '{+ 1 2}) (list (INT-CONST 2) (INT-CONST 1) (SUB)))

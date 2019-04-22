@@ -183,4 +183,7 @@ TODO
     [(fun-db body) (list (CLOSURE (append (compile body) (list (RETURN)))))]
     [(app expr1 expr2) (append (compile expr2) (compile expr1) (list (APPLY)))]))
 
-(define (typed-compile s-expr) #f)
+(define (typed-compile s-expr)
+  (def parsed-expr (parse s-expr))
+  (def type-check-expr (typecheck s-expr))
+  (compile (deBruijn parsed-expr)))
