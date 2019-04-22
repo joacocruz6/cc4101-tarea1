@@ -174,6 +174,13 @@ TODO
     [(app (fun args args-type body body-type) expr2) (app (fun-db (deBruijn body (extend-bruijn-env args env))) (deBruijn expr2 env))]
     [(app (id x) expr2) (app (lookup-bruijn-env x env) (deBruijn expr2 env))]))
 
-(define (compile expr) #f)
+(define (compile expr)
+  (match expr
+    [(num n) (list (INT-CONST n))]
+    [(acc n) (list (ACCESS n))]
+    [(add l r) (append (compile r) (compile l) (list (ADD)))]
+    [(sub l r) (append (compile r) (compile l) (list (SUB)))]
+    [(fun-db body) (list (CLOSURE (append (compile body) (list (RETURN)))))]
+    [(app expr1 expr2) (append (compile expr2) (compile expr1) (list (APPLY)))]))
 
 (define (typed-compile s-expr) #f)

@@ -2,11 +2,6 @@
 (require "main.rkt")
 (require "machine.rkt")
 
-
-
-
-
-
 ;; parse-type
 (test (parse-type '{Num}) (TNum))
 (test (parse-type '{Num -> Num}) (TFun (TNum) (TNum)))
@@ -73,9 +68,13 @@
 (test (deBruijn (parse '{with {x : {Num -> Num} {fun {y : Num} : Num (+ y y)}}
                               {with {y : Num 2}
                                     {x y}}})) (app (fun-db (app (fun-db (app (acc 1) (acc 0))) (num 2))) (fun-db (add (acc 0) (acc 0)))))
+(test (deBruijn (fun 'x (TNum) (add (id 'x) (num 1)) (TNum))) (fun-db (add (acc 0) (num 1))))
+(test (deBruijn (parse '(fun {x : Num} : {Num -> Num} 10 )))  (fun-db (num 10)))
 (test/exn (deBruijn (parse 'x)) "Free identifier: x")
 
-#|
+
 ;;compile
-(test (compile (add (num 2) (num 1))) (list  (INT-CONST 1) (INT-CONST 2) (ADD)))
-|#
+(test (compile (num 1)) (list (INT-CONST 1)))
+(test (compile (sub (num 1) (num 1))) (list (INT-CONST 1) (INT-CONST 1) (SUB)))
+(test (compile (add (num 2) (num 1))) (list (INT-CONST 1) (INT-CONST 2) (ADD)))
+(test (compile (deBruijn (parse '{{fun {x : Num} : Num {+ x 10}} {+ 2 3}}))) (list (INT-CONST 3) (INT-CONST 2) (ADD) (CLOSURE (list (INT-CONST 10) (ACCESS 0) (ADD) (RETURN))) (APPLY))) 
