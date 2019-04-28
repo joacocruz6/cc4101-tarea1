@@ -31,7 +31,7 @@
   (TNum)
   (TFun arg ret))
 #|
-Definición del ambiente de variables con sus tipos
+Definición del ADT ambiente de variables con sus tipos
 |#
 (deftype TypeEnv
   (mtEnv)
@@ -52,9 +52,9 @@ Busca el tipo de la variable x en el ambiente, si no esta tira error de identifi
 
 
 #|
-parse-type: List[Symbol] -> Type (o error)
+parse-type ::= List[Symbol] -> Type (o error)
 Parsea el tipo de el contrato de una función. Puede generar error de tipos
-si uno de los dos no es encontrado.
+si al declarar una funcion uno de los dos no es declarado.
 |#
 (define (parse-type s-expr)
   (match s-expr
@@ -66,7 +66,7 @@ si uno de los dos no es encontrado.
     [(list '-> res-expr) (error "Parse error")]))
 
 #|
-parse: List[Symbol] -> Expr
+parse ::= List[Symbol] -> Expr
 Parsea una lista de simbolos a un AST del lenguaje con tipos.
 |#
 (define (parse s-expr)
@@ -83,7 +83,7 @@ Parsea una lista de simbolos a un AST del lenguaje con tipos.
      (app (parse {list 'fun {list args ': args-type} body}) (parse expr-value))]
     [(list expr1 expr2) (app (parse expr1) (parse expr2))]))
 #|
-prettify :: Type -> List[Symbol] (o un symbolo si es TNum)
+prettify ::= Type -> List[Symbol] (o un symbolo si es TNum)
 Dado un tipo del lenguaje se transforma en sintaxis concreta.
 |#
 (define (prettify t-expr)
@@ -92,7 +92,7 @@ Dado un tipo del lenguaje se transforma en sintaxis concreta.
   [(TFun t-arg t-ret) (list (prettify t-arg) '-> (prettify t-ret))]))
 
 #|
-typeof-ext :: Expr TypeEnv -> Type (o error)
+typeof-ext ::= Expr TypeEnv -> Type (o error)
 Dada una expresion parseada y un ambiente, determina el tipo de esa expresión.
 Puede generar error de tipos en caso de que haya en el programa escrito
 |#
@@ -141,14 +141,14 @@ Puede generar error de tipos en caso de que haya en el programa escrito
        [ _ (error "Type error in expression app position 1: expected (T -> S) found" (prettify (typeof-ext expr1 env)))] ;cualquier otra cosa esta mala
     )]))
 #|
-typeof :: Expr -> Type (o error)
+typeof ::= Expr -> Type (o error)
 Dada una expresion parseada, determina el tipo de esa expresión.
 Puede generar error de tipos en caso de encontrarlo.
 |#
 (define (typeof expr)
   (typeof-ext expr))
 #|
-typecheck :: List[Symbol] -> List[Symbol] (o error)
+typecheck ::= List[Symbol] -> List[Symbol] (o error)
 Dada una lista de simbolos que representan un programa en el lenguaje definido, se entrega una lista de symbolos.
 Puede generar error de tipos en caso que se de en el programa escrito.
 |#
@@ -170,7 +170,7 @@ Declaración sobre el ambiente de bruijn
 #|
 lookup-bruijn-env ::= <id> Env -> <acc> (o error)
 Busca en el ambiente de bruijn index el id x, y da la expression acc con
-su indice asociado. Genera error al no encontrar el identificadore en el ambiente
+su indice asociado en la primera aparición. Genera error al no encontrar el identificadore en el ambiente
 asociandolo a un identificador libre.
 |#
 (define (lookup-bruijn-env x env [pos 0])
