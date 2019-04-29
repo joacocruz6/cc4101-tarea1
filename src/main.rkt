@@ -1,6 +1,7 @@
 #lang play
 (require "machine.rkt")
-(print-only-errors #t) 
+(print-only-errors #t)
+;; Alumno: Joaquin Cruz
 ;;;;;;;;;;;;;;;;;;;;;;;
 ;; Language definition
 ;;;;;;;;;;;;;;;;;;;;;;;
@@ -36,7 +37,15 @@ Definición del ADT ambiente de variables con sus tipos
 (deftype TypeEnv
   (mtEnv)
   (tpEnv id type next))
+#|
+empty-type-env ::= None -> TypeEnv
+Crea el ambiente vacio
+|#
 (define empty-type-env (mtEnv))
+#|
+extend-type-env ::= Symbol Type -> TypeEnv
+Añade el symbolo y su tipo al ambiente
+|# 
 (define extend-type-env tpEnv)
 #|
 lookup-type-env ::= id TypeEnv -> Type (o error)
@@ -165,7 +174,15 @@ Declaración sobre el ambiente de bruijn
 |#
 (deftype Env
   (BruijnEnv id next))
+#|
+empty-bruijn-env ::= None -> TypeEnv
+Crea el ambiente vacio para los indices de bruijn
+|#
 (define empty-bruijn-env (mtEnv))
+#|
+extend-bruijn-env ::= Symbol -> Env
+Extiende el ambiente de indices de bruijn dado un indice
+|#
 (define extend-bruijn-env BruijnEnv)
 #|
 lookup-bruijn-env ::= <id> Env -> <acc> (o error)

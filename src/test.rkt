@@ -1,6 +1,11 @@
 #lang play
+;;Alumno : Joaquin Cruz
 (require "main.rkt")
 (require "machine.rkt")
+;;emppty-type-env
+(test empty-type-env (mtEnv))
+;;extend-type-env
+(test (extend-type-env 'x (TNum) (extend-type-env 'y (TFun (TNum) (TNum)) empty-type-env)) (tpEnv 'x (TNum) (tpEnv 'y (TFun (TNum) (TNum)) (mtEnv))))
 
 ;;lookup-type-env
 (test (lookup-type-env 'x (extend-type-env 'x (TNum) empty-type-env)) (TNum))
@@ -17,11 +22,6 @@
 (test/exn (parse-type '{ -> Num}) "Parse error")
 (test/exn (parse-type '{{Num -> Num} -> {Num -> }}) "Parse error")
 
-;;prettify tests
-(test (prettify (TNum)) 'Num)
-(test (prettify (TFun (TNum) (TNum))) '{Num -> Num})
-(test (prettify (TFun (TFun (TNum) (TNum)) (TNum))) '{{Num -> Num} -> Num})
-
 ;; parse
 (test (parse '3) (num 3))
 (test (parse '{+ 1 3}) (add (num 1) (num 3)))
@@ -36,6 +36,11 @@
 (test (parse '{{fun {x : Num} : Num {+ x 1}} 2}) (app (fun 'x (TNum) (add (id 'x) (num 1)) (TNum)) (num 2)))
 (test (parse '{with {y : {Num -> Num} {fun {x : Num} : Num {+ x x}}} {y 2}}) (app (fun 'y (TFun (TNum) (TNum)) (app (id 'y) (num 2)) #f) (fun 'x (TNum) (add (id 'x) (id 'x)) (TNum))))
 
+;;prettify tests
+(test (prettify (TNum)) 'Num)
+(test (prettify (TFun (TNum) (TNum))) '{Num -> Num})
+(test (prettify (TFun (TFun (TNum) (TNum)) (TNum))) '{{Num -> Num} -> Num})
+(test (prettify (TFun (TNum) (TFun (TNum) (TNum)))) '{Num -> {Num -> Num}})
 ;;typeof-ext
 (test (typeof-ext (parse '3)) (TNum)) ;Test para verificar tipo de los numeros
 (test (typeof-ext (parse '{+ 1 3})) (TNum)) ;Test para verificar tipo de la adicion numerica
@@ -73,7 +78,14 @@
                                        {with {c : Num 1}
                                              {with {d : Num (fun {x : Num} : {Num -> Num} 1)}
                                                    (+ a a)}}}}}) "Type error in expression fun position 1: expected (Num -> Num) found Num")
+;;empty-bruijn-env
+(test empty-bruijn-env (mtEnv))
+;;extend-bruijn-env
+(test (extend-bruijn-env 'x (extend-bruijn-env 'y empty-bruijn-env)) (BruijnEnv 'x (BruijnEnv 'y empty-bruijn-env)))
+;;extend-brujn-env
+;; lookup-bruijn-env
 (test (lookup-bruijn-env 'x (extend-bruijn-env 'y (extend-bruijn-env 'x empty-bruijn-env))) (acc 1))
+(test (lookup-bruijn-env 'x (extend-bruijn-env 'z (extend-bruijn-env 'r (extend-bruijn-env 'x (extend-bruijn-env 'y (extend-bruijn-env 'x empty-bruijn-env)))))) (acc 2))
 (test/exn (lookup-bruijn-env 'x (extend-bruijn-env 'y (extend-bruijn-env 'z empty-bruijn-env))) "Free identifier: x")
 (test/exn (lookup-bruijn-env 'x empty-bruijn-env) "Free identifier: x")
 
